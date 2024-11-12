@@ -1,51 +1,141 @@
 import streamlit as st
-from datetime import datetime
 
-# Sample data (Replace with actual Sodexo data)
-sodexo_data = {
-    "Grilled Chicken Breast": {"calories": 200, "protein": 35, "carbs": 0, "fats": 5},
-    "Mashed Potatoes": {"calories": 150, "protein": 3, "carbs": 25, "fats": 4},
-    "Salad": {"calories": 50, "protein": 2, "carbs": 10, "fats": 0},
-    # Add more items as needed
+# Full list of items and their calorie counts
+menu = {
+    "Breakfast": {
+        "Bacon, Egg And Cheese Muffin": 350,
+        "Fried Egg O'muffin Sandwich": 310,
+        "Scrambled Eggs": 190,
+        "Bacon Slices": 70,
+        "Fried Tater Tots": 250,
+        "Buttermilk Pancakes": 180,
+        "Everything Omelet": 290,
+        "Grits": 90,
+        "Oatmeal": 110,
+        "Bacon": 60,
+        "Agave Roasted Peaches": 20,
+        "Roasted Mexican Potatoes": 45,
+        "Mango Banana Smoothie": 100,
+        "Strawberry Banana Smoothie": 100,
+        "Pineapple & Honey Smoothie": 190,
+        "Mango Pineapple Smoothie": 110,
+        "Brown Sugar Cinnamon Mini Scone": 200,
+        "Strawberry Shortcake Muffins": 130,
+        "Scrambled Tofu": 60,
+        "Lyonnaise Potatoes": 45,
+        "Roasted Red Beets": 25,
+    },
+    "Lunch": {
+        "Brown Rice": 90,
+        "Sauteed Collard Greens": 80,
+        "Steamed Broccoli": 10,
+        "Roasted Brussels Sprouts": 20,
+        "Garlic Orange Chili Tofu": 420,
+        "White Rice": 190,
+        "Grilled Fresh Tilapia": 180,
+        "Crispy Smashed Red Bliss Potato": 170,
+        "Balsamic Roasted Vegetables": 60,
+        "BBQ Chicken Thigh": 190,
+        "Tomato, Bacon & Cheddar Baguette": 540,
+        "Grilled Garlic Chicken": 150,
+        "Black Bean Burger": 240,
+        "Cheeseburger On Bun": 200,
+        "French Fries": 150,
+        "Hamburger On Bun": 150,
+        "BBQ Pork Riblet Sandwich": 380,
+        "Beef Bulgogi Rice Bowl": 470,
+        "Cheese Pizza": 250,
+        "Vegetable Lovers Feast Pizza": 290,
+        "Pepperoni Pizza": 250,
+        "BLT Pizza": 310,
+        "Broccoli, Cheese & Rice Casserole": 230,
+        "Baked Garlic Breadstick": 90,
+        "Lemony Chickpea Salad": 100,
+        "Latin Chipotle Quinoa Salad": 130,
+        "Salsa": 10,
+        "Pico De Gallo": 0,
+        "Cilantro Chicken Taco": 100,
+        "Sour Cream": 30,
+        "Cilantro Lime Brown Rice": 120,
+        "Extra Firm Tofu": 60,
+        "Baja Roasted Vegetables": 50,
+        "Tomato Basil Marinara": 20,
+        "Southwestern Beef Patty": 220,
+        "Gluten Free Penne": 170,
+        "Cilantro Cucumber Salad": 70,
+        "Mediterranean Lentil Ragout": 35,
+        "Aromatic Seasoned Basmati Rice": 130,
+        "Creamy Broccoli & Cheddar Soup": 200,
+        "Chili Con Carne": 190,
+        "Two Chocolate Chip Cookies": 230,
+        "Tabbouleh With Garbanzo Beans": 110,
+        "Simply Sauteed Broccoli Rabe": 25,
+        "Baba Ghanoush": 60,
+        "Vegan Lemon Garlic Aioli": 90,
+    },
+    "Dinner": {
+        "Herb Grilled Chicken Breast": 160,
+        "Roasted Brussels Sprouts": 20,
+        "Brown Rice": 90,
+        "White Rice": 190,
+        "Steamed Broccoli": 10,
+        "Sauteed Collard Greens": 80,
+        "Balsamic Roasted Vegetables": 60,
+        "Creole Sauce": 35,
+        "Roast Loin Of Pork": 210,
+        "Rice & Red Beans": 180,
+        "Sauteed Yellow Squash & Zucchini": 90,
+        "Tomato, Bacon & Cheddar Baguette": 540,
+        "Grilled Garlic Chicken": 150,
+        "French Fries": 150,
+        "Hamburger On Bun": 150,
+        "Black Bean Burger": 240,
+        "Cheeseburger On Bun": 200,
+        "Italian Sausage Sandwich": 150,
+        "Alfredo Sauce": 190,
+        "Marinara Sauce": 50,
+        "Bow Tie Noodles": 390,
+        "Vegetable Lovers Feast Pizza": 290,
+        "Cheese Pizza": 250,
+        "Pepperoni Pizza": 250,
+        "BLT Pizza": 310,
+        "Garlic Breadstick": 160,
+        "Lemony Chickpea Salad": 100,
+        "Latin Chipotle Quinoa Salad": 130,
+        "Sour Cream": 30,
+        "Pico De Gallo": 0,
+        "Baja Roasted Vegetables": 50,
+        "Cilantro Lime Brown Rice": 120,
+        "Salsa": 10,
+        "Cilantro Chicken Taco": 100,
+        "Lemon Dill Haddock": 80,
+        "Roasted Lemon Parsley Potato Wedges": 100,
+        "Tomato Basil Marinara": 20,
+        "Green Beans With Oregano": 60,
+        "Gluten Free Penne": 170,
+        "Creamy Broccoli & Cheddar Soup": 200,
+        "Chili Con Carne": 190,
+        "Spicy Potatoes": 110,
+        "Banana Cream Pie Pudding": 190,
+        "Raspberry Gelatin Parfait": 80,
+        "Sriracha Aioli": 90,
+        "Glazed Tofu": 45,
+        "Falafel Patty": 130,
+        "Apple Cider Red Cabbage Slaw": 60,
+    }
 }
 
-# Initialize session state for food logging
-if 'selected_food' not in st.session_state:
-    st.session_state.selected_food = []
+# Streamlit App Interface
+st.title("Bentley Dining Nutrition Tracker")
 
-st.title("Bentley Dining Hall Nutrition Tracker")
-st.write("Select the food items you consumed today:")
+selected_foods = []
+for meal, items in menu.items():
+    st.header(meal)
+    selected_foods += st.multiselect(f"Select items for {meal}", options=items.keys(), key=meal)
 
-# List available food items with checkboxes
-for food, nutrition in sodexo_data.items():
-    if st.checkbox(food):
-        if food not in st.session_state.selected_food:
-            st.session_state.selected_food.append(food)
-    else:
-        if food in st.session_state.selected_food:
-            st.session_state.selected_food.remove(food)
+# Calculate total calories
+total_calories = sum(menu[meal][food] for meal in menu for food in selected_foods if food in menu[meal])
 
-# Calculate daily nutrition intake
-def calculate_daily_nutrition(selected_food):
-    daily_nutrition = {"calories": 0, "protein": 0, "carbs": 0, "fats": 0}
-    for item in selected_food:
-        nutrition = sodexo_data[item]
-        daily_nutrition["calories"] += nutrition["calories"]
-        daily_nutrition["protein"] += nutrition["protein"]
-        daily_nutrition["carbs"] += nutrition["carbs"]
-        daily_nutrition["fats"] += nutrition["fats"]
-    return daily_nutrition
-
-# Display daily nutritional summary
-if st.button("Calculate Daily Intake"):
-    daily_intake = calculate_daily_nutrition(st.session_state.selected_food)
-    st.subheader("Today's Nutritional Intake")
-    st.write(f"Calories: {daily_intake['calories']} kcal")
-    st.write(f"Protein: {daily_intake['protein']} g")
-    st.write(f"Carbohydrates: {daily_intake['carbs']} g")
-    st.write(f"Fats: {daily_intake['fats']} g")
-
-# Optional: Reset selection
-if st.button("Reset Selection"):
-    st.session_state.selected_food = []
-
+# Display total calories
+st.write("### Your Total Caloric Intake:")
+st.write(f"{total_calories} calories")
