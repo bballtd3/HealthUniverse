@@ -1,62 +1,51 @@
-import sqlite3
+import streamlit as st
 from datetime import datetime
 
-# Connect to SQLite database (or create one if it doesn't exist)
-conn = sqlite3.connect('dining_nutrition.db')
-cursor = conn.cursor()
-
-# Sample table creation (if not already created)
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS nutrition_data (
-    id INTEGER PRIMARY KEY,
-    item_name TEXT,
-    calories INTEGER,
-    protein INTEGER,
-    carbs INTEGER,
-    fats INTEGER
-)
-''')
-
-# Example of inserting sample data (replace with actual data from Sodexo)
-sample_data = [
-    ("Grilled Chicken Breast", 200, 35, 0, 5),
-    ("Mashed Potatoes", 150, 3, 25, 4),
-    ("Salad", 50, 2, 10, 0),
+# Sample data (Replace with actual Sodexo data)
+sodexo_data = {
+    "Grilled Chicken Breast": {"calories": 200, "protein": 35, "carbs": 0, "fats": 5},
+    "Mashed Potatoes": {"calories": 150, "protein": 3, "carbs": 25, "fats": 4},
+    "Salad": {"calories": 50, "protein": 2, "carbs": 10, "fats": 0},
     # Add more items as needed
-]
-cursor.executemany("INSERT INTO nutrition_data (item_name, calories, protein, carbs, fats) VALUES (?, ?, ?, ?, ?)", sample_data)
-conn.commit()
+}
 
-# Function to log what food a user selects
-def log_food_consumption(user_id, item_name):
-    current_date = datetime.now().strftime("%Y-%m-%d")
-    cursor.execute("INSERT INTO user_food_log (user_id, date, item_name) VALUES (?, ?, ?)", (user_id, current_date, item_name))
-    conn.commit()
+# Initialize session state for food logging
+if 'selected_food' not in st.session_state:
+    st.session_state.selected_food = []
 
-# Function to calculate daily nutrition based on logged foods
-def calculate_daily_nutrition(user_id, date):
-    cursor.execute('''
-        SELECT item_name, calories, protein, carbs, fats
-        FROM nutrition_data
-        WHERE item_name IN (SELECT item_name FROM user_food_log WHERE user_id = ? AND date = ?)
-    ''', (user_id, date))
-    
+st.title("Bentley Dining Hall Nutrition Tracker")
+st.write("Select the food items you consumed today:")
+
+# List available food items with checkboxes
+for food, nutrition in sodexo_data.items():
+    if st.checkbox(food):
+        if food not in st.session_state.selected_food:
+            st.session_state.selected_food.append(food)
+    else:
+        if food in st.session_state.selected_food:
+            st.session_state.selected_food.remove(food)
+
+# Calculate daily nutrition intake
+def calculate_daily_nutrition(selected_food):
     daily_nutrition = {"calories": 0, "protein": 0, "carbs": 0, "fats": 0}
-    for item in cursor.fetchall():
-        daily_nutrition["calories"] += item[1]
-        daily_nutrition["protein"] += item[2]
-        daily_nutrition["carbs"] += item[3]
-        daily_nutrition["fats"] += item[4]
-    
+    for item in selected_food:
+        nutrition = sodexo_data[item]
+        daily_nutrition["calories"] += nutrition["calories"]
+        daily_nutrition["protein"] += nutrition["protein"]
+        daily_nutrition["carbs"] += nutrition["carbs"]
+        daily_nutrition["fats"] += nutrition["fats"]
     return daily_nutrition
 
-# Example usage
-user_id = 123  # Replace with actual user ID
-log_food_consumption(user_id, "Grilled Chicken Breast")
-log_food_consumption(user_id, "Salad")
+# Display daily nutritional summary
+if st.button("Calculate Daily Intake"):
+    daily_intake = calculate_daily_nutrition(st.session_state.selected_food)
+    st.subheader("Today's Nutritional Intake")
+    st.write(f"Calories: {daily_intake['calories']} kcal")
+    st.write(f"Protein: {daily_intake['protein']} g")
+    st.write(f"Carbohydrates: {daily_intake['carbs']} g")
+    st.write(f"Fats: {daily_intake['fats']} g")
 
-daily_intake = calculate_daily_nutrition(user_id, datetime.now().strftime("%Y-%m-%d"))
-print("Today's intake:", daily_intake)
+# Optional: Reset selection
+if st.button("Reset Selection"):
+    st.session_state.selected_food = []
 
-# Close the connection when done
-conn.close()
